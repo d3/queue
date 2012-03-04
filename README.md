@@ -1,6 +1,6 @@
 # queue.js
 
- **Queue.js** is yet another asynchronous helper library for JavaScript. Think of it as a minimalist version of [Async.js](https://github.com/caolan/async) that allows fine-tuning over parallelism. Or, think of it as a version of [TameJs](http://tamejs.org/) that does not use code generation.
+**Queue.js** is yet another asynchronous helper library for JavaScript. Think of it as a minimalist version of [Async.js](https://github.com/caolan/async) that allows fine-tuning over parallelism. Or, think of it as a version of [TameJs](http://tamejs.org/) that does not use code generation.
 
 For example, if you wanted to stat two files in parallel:
 
@@ -29,8 +29,12 @@ Constructs a new queue with the specified *parallelism*. If *parallelism* is not
 
 ### queue.defer(method[, arguments…])
 
-Adds the specified *method* to the queue, with any optional *arguments*.
+Adds the specified *method* to the queue, with any optional *arguments*. The *method* is called with the optional arguments and a final callback argument, which should be called when the task has finished.
 
 ### queue.await(callback)
 
 Sets the *callback* to be notified when all deferred tasks have finished.
+
+## Callbacks
+
+The callbacks follow the Node.js convention where the first argument is an optional error object, and the second is used to pass on the result of an operation.
