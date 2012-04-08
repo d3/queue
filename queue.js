@@ -45,6 +45,9 @@
         ++active;
         a.push(function(e, r) {
           --active;
+          if (error) {
+            return;
+          }
           if (e) {
             if (remaining) {
               // clearing remaining cancels subsequent callbacks

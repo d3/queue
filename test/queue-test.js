@@ -70,6 +70,19 @@ suite.addBatch({
     }
   },
 
+  "queue with multiple tasks where one errors": {
+    topic: function() {
+      queue()
+          .defer(function(callback) { process.nextTick(function() { callback(-1); }); })
+          .defer(function(callback) { process.nextTick(function() { callback(null, 'ok'); }); })
+          .await(this.callback);
+    },
+    "the first error is returned": function(error, results) {
+      assert.equal(error, -1);
+      assert.isNull(results);
+    }
+  },
+
   "queue with multiple synchronous tasks that error": {
     topic: function() {
       queue()
