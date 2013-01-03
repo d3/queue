@@ -31,18 +31,14 @@
     };
 
     queue.await = function(f) {
-      if (f) {
-        if (!executed || remaining) await.push(f);
-        else notifyAwait(f);
-      }
+      if (!executed || remaining) await.push(f);
+      else notifyAwait(f);
       return queue;
     };
 
     queue.awaitAll = function(f) {
-      if (f) {
-        if (!executed || remaining) awaitAll.push(f);
-        else notifyAwaitAll(f);
-      }
+      if (!executed || remaining) awaitAll.push(f);
+      else notifyAwaitAll(f);
       return queue;
     };
 
