@@ -11,12 +11,14 @@
         head, tail, // singly-linked list of deferrals
         error = null,
         results = [],
-        await = noop,
-        awaitAll;
+        await = [],
+        awaitAll = [],
+        executed;
 
     if (arguments.length < 1) parallelism = Infinity;
 
     queue.defer = function() {
+      executed = true;
       if (!error) {
         var node = arguments;
         node.index = results.push(undefined) - 1;
@@ -29,16 +31,18 @@
     };
 
     queue.await = function(f) {
-      await = f;
-      awaitAll = false;
-      if (!remaining) notify();
+      if (f) {
+        if (!executed || remaining) await.push(f);
+        else notifyAwait(f);
+      }
       return queue;
     };
 
     queue.awaitAll = function(f) {
-      await = f;
-      awaitAll = true;
-      if (!remaining) notify();
+      if (f) {
+        if (!executed || remaining) awaitAll.push(f);
+        else notifyAwaitAll(f);
+      }
       return queue;
     };
 
@@ -72,13 +76,24 @@
     }
 
     function notify() {
-      if (error != null) await(error);
-      else if (awaitAll) await(null, results);
-      else await.apply(null, [null].concat(results));
+      notifyType(await, notifyAwait);
+      notifyType(awaitAll, notifyAwaitAll);
+    }
+
+    function notifyType(arr, func) {
+      for (var i=0; i<arr.length; i++) {
+        func(arr[i]);
+      }
+    }
+
+    function notifyAwait(callback) {
+      callback.apply(null, error ? [error] : [null].concat(results));
+    }
+
+    function notifyAwaitAll(callback) {
+      callback(error, error ? undefined : results);
     }
 
     return queue;
   }
-
-  function noop() {}
 })();

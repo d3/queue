@@ -258,6 +258,33 @@ suite.addBatch({
     "executes all tasks in series": function(error, results) {
       assert.deepEqual(results, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     }
+  },
+
+  "multiple awaitAll calls": {
+    topic: function() {
+      var call1Rtn = false,
+          call2Rtn = false;
+          t = synchronousTask();
+      queue(1)
+          .awaitAll(function(error, results) {
+            assert.isFalse(call1Rtn);
+            call1Rtn = true;
+          })
+          .awaitAll(function() {
+            assert.isFalse(call2Rtn);
+            call2Rtn = true;
+          })
+          .awaitAll(this.callback)
+          .defer(t);
+      assert.isTrue(call1Rtn);
+      assert.isTrue(call2Rtn);
+    },
+    "does not fail": function(error, results) {
+      assert.isNull(error);
+    },
+    "executes all tasks in series": function(error, results) {
+      assert.deepEqual(results, [1]);
+    }
   }
 
 });
