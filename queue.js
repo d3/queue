@@ -77,7 +77,8 @@
     }
 
     function notifyType(arr, func) {
-      for (var i=0; i<arr.length; i++) {
+      var length = arr.length;
+      for (var i=0; i<length; i++) {
         func(arr[i]);
       }
     }
