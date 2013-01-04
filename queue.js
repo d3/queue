@@ -12,13 +12,11 @@
         error = null,
         results = [],
         await = [],
-        awaitAll = [],
-        executed;
+        awaitAll = [];
 
     if (arguments.length < 1) parallelism = Infinity;
 
     queue.defer = function() {
-      executed = true;
       if (!error) {
         var node = arguments;
         node.index = results.push(undefined) - 1;
@@ -31,14 +29,14 @@
     };
 
     queue.await = function(f) {
-      if (!executed || remaining) await.push(f);
-      else notifyAwait(f);
+      await.push(f);
+      if (!remaining) notifyAwait(f);
       return queue;
     };
 
     queue.awaitAll = function(f) {
-      if (!executed || remaining) awaitAll.push(f);
-      else notifyAwaitAll(f);
+      if (!remaining) notifyAwaitAll(f);
+      awaitAll.push(f);
       return queue;
     };
 

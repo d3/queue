@@ -263,9 +263,12 @@ suite.addBatch({
   "multiple awaitAll calls": {
     topic: function() {
       var call1Rtn = false,
-          call2Rtn = false;
-          t = synchronousTask();
+          call2Rtn = false,
+          callback;
       queue(1)
+          .defer(function(_callback) {
+            callback = _callback;
+          })
           .awaitAll(function(error, results) {
             assert.isFalse(call1Rtn);
             call1Rtn = true;
@@ -274,8 +277,8 @@ suite.addBatch({
             assert.isFalse(call2Rtn);
             call2Rtn = true;
           })
-          .awaitAll(this.callback)
-          .defer(t);
+          .awaitAll(this.callback);
+      callback(null, 1);
       assert.isTrue(call1Rtn);
       assert.isTrue(call2Rtn);
     },
