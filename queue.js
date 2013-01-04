@@ -11,8 +11,8 @@
         head, tail, // singly-linked list of deferrals
         error = null,
         results = [],
-        await = noop,
-        awaitAll;
+        await = [],
+        awaitAll = [];
 
     if (arguments.length < 1) parallelism = Infinity;
 
@@ -29,16 +29,14 @@
     };
 
     queue.await = function(f) {
-      await = f;
-      awaitAll = false;
-      if (!remaining) notify();
+      await.push(f);
+      if (!remaining) notifyAwait(f);
       return queue;
     };
 
     queue.awaitAll = function(f) {
-      await = f;
-      awaitAll = true;
-      if (!remaining) notify();
+      if (!remaining) notifyAwaitAll(f);
+      awaitAll.push(f);
       return queue;
     };
 
@@ -72,13 +70,25 @@
     }
 
     function notify() {
-      if (error != null) await(error);
-      else if (awaitAll) await(null, results);
-      else await.apply(null, [null].concat(results));
+      notifyType(await, notifyAwait);
+      notifyType(awaitAll, notifyAwaitAll);
+    }
+
+    function notifyType(arr, func) {
+      var length = arr.length;
+      for (var i=0; i<length; i++) {
+        func(arr[i]);
+      }
+    }
+
+    function notifyAwait(callback) {
+      callback.apply(null, error ? [error] : [null].concat(results));
+    }
+
+    function notifyAwaitAll(callback) {
+      callback(error, error ? undefined : results);
     }
 
     return queue;
   }
-
-  function noop() {}
 })();
