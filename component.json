@@ -1,0 +1,6 @@
+{
+  "name": "queue",
+  "main": ["queue.min.js", "queue.js"],
+  "version": "1.0.0",
+  "dependencies": {}
+}
