@@ -9,20 +9,43 @@
     var queue = {},
         active = 0, // number of in-flight deferrals
         remaining = 0, // number of deferrals remaining
-        head, tail, // singly-linked list of deferrals
+        tasks = [], // list of tasks to invoke (FIFO)
         error = null,
         results = [],
         await = noop,
-        awaitAll;
+        awaitAll, currentTask;
 
     if (!parallelism) parallelism = Infinity;
 
-    queue.defer = function() {
+    queue.defer = function(fn) {
       if (!error) {
-        var node = arguments;
-        node.i = results.push(undefined) - 1;
-        if (tail) tail._ = node, tail = tail._;
-        else head = tail = node;
+        var args = slice.call(arguments, 1);
+        var i = results.length;
+        results.push(undefined);
+
+        args.push(function(err, res) {
+          --active;
+          if (error != null) return;
+          if (err != null) {
+            // setting error ignores subsequent calls to defer
+            // clearing tasks stops queued tasks from being executed
+            // clearing remaining cancels subsequent callbacks
+            error = err;
+            tasks = [];
+            remaining = null;
+            notify();
+          } else {
+            results[i] = res;
+            if (--remaining) currentTask || pop();
+            else notify();
+          }
+        });
+
+        tasks.push(function() {
+          ++active;
+          fn.apply(null, args);
+        });
+
         ++remaining;
         pop();
       }
@@ -44,33 +67,8 @@
     };
 
     function pop() {
-      var popping;
-      while (popping = head && active < parallelism) {
-        var node = head,
-            f = node[0],
-            a = slice.call(node, 1),
-            i = node.i;
-        if (head === tail) head = tail = null;
-        else head = head._;
-        ++active;
-        a.push(function(e, r) {
-          --active;
-          if (error != null) return;
-          if (e != null) {
-            // clearing remaining cancels subsequent callbacks
-            // clearing head stops queued tasks from being executed
-            // setting error ignores subsequent calls to defer
-            error = e;
-            remaining = results = head = tail = null;
-            notify();
-          } else {
-            results[i] = r;
-            if (--remaining) popping || pop();
-            else notify();
-          }
-        });
-        f.apply(null, a);
-      }
+      while (currentTask = active < parallelism && tasks.shift())
+        currentTask();
     }
 
     function notify() {
