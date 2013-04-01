@@ -49,10 +49,12 @@
         var node = head,
             f = node[0],
             a = slice.call(node, 1),
+            c = noop,
             i = node.i;
         if (head === tail) head = tail = null;
         else head = head._;
         ++active;
+        if (typeof a[a.length-1] === "function") c = a.pop();
         a.push(function(e, r) {
           --active;
           if (error != null) return;
@@ -64,6 +66,7 @@
             remaining = results = head = tail = null;
             notify();
           } else {
+            c(r, remaining-1);
             results[i] = r;
             if (--remaining) popping || pop();
             else notify();
