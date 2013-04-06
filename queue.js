@@ -27,6 +27,14 @@
       return queue;
     };
 
+    queue.map = function (f, items) {
+      var args = slice.call(arguments, 2);
+        for (var i = 0; i < items.length; i++) {
+          queue.defer.apply(queue, [f, items[i]].concat(args));
+        }
+      return queue;
+    };
+
     queue.await = function(f) {
       await = f;
       all = false;

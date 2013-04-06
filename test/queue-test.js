@@ -127,6 +127,43 @@ suite.addBatch({
     }
   },
 
+  "example queue.map using fs.stat": {
+    topic: function() {
+      var files = [
+        __dirname + '/../Makefile',
+        __dirname + "/../README.md",
+        __dirname + "/../package.json"
+      ];
+      queue()
+          .map(fs.stat, files)
+          .await(this.callback);
+    },
+    "does not fail": function(error, one, two, three) {
+      assert.isNull(error);
+    },
+    "successfully executes the three tasks": function(error, one, two, three) {
+      assert.greater(one.size, 0);
+      assert.greater(two.size, 0);
+      assert.greater(three.size, 0);
+    }
+  },
+
+  "queue.map with arguments": {
+    topic: function() {
+      var files = [
+        __dirname + '/../Makefile',
+        __dirname + "/../README.md",
+        __dirname + "/../package.json"
+      ];
+      queue()
+          .map(function(s,p,x,next){ next(null, s+p+x) }, [1,2,3], 'p', 'x')
+          .awaitAll(this.callback);
+    },
+    "successfully receives arguments": function(error, results) {
+      assert.deepEqual(results, ['1px', '2px', '3px'])
+    }
+  },
+
   "fully-parallel queue of ten asynchronous tasks": {
     topic: function() {
       var t = asynchronousTask();
