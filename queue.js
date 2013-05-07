@@ -24,6 +24,10 @@
             t = tasks[i],
             a = slice.call(t, 1);
         a.push(callback(i));
+
+        // Tag the last argument as being a callback function for queue
+        a[a.length -1]._isQueueCallback = true;
+
         ++active;
         t[0].apply(null, a);
       }
@@ -74,6 +78,18 @@
       }
     };
   }
+
+  queue.next = function () {
+
+    var
+      caller        = arguments.callee.caller || arguments.caller,
+      callerArgs    = caller ? caller.arguments : null;
+
+      if (callerArgs && callerArgs[callerArgs.length-1]._isQueueCallback) {
+        callerArgs[callerArgs.length-1]();
+        delete(callerArgs[callerArgs.length-1]._isQueueCallback);
+      }
+  };
 
   function noop() {}
 })();
