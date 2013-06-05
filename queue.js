@@ -19,7 +19,7 @@
     if (!parallelism) parallelism = Infinity;
 
     function pop() {
-      while (popping = started < tasks.length && active < parallelism) {
+      while (popping = started < tasks.length && active <= parallelism) {
         var i = started++,
             t = tasks[i],
             a = slice.call(t, 1);
