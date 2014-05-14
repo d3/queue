@@ -1,8 +1,20 @@
 (function() {
   var slice = [].slice;
 
-  function queue(parallelism) {
+  function queue(parallelism, options) {
+    if (options == null) {
+      if (parallelism !== null && typeof parallelism === 'object') {
+        options = parallelism;
+        parallelism = null;
+      } else {
+        options = {
+          autoStart: true
+        }
+      }
+    }
+
     var q,
+        autoStart = options.autoStart == null ? true : options.autoStart,
         tasks = [],
         started = 0, // number of tasks that have been started (and perhaps finished)
         active = 0, // number of tasks currently being executed (started but not finished)
@@ -10,6 +22,7 @@
         popping, // inside a synchronous task callback?
         error = null,
         await = noop,
+        queueStarted = autoStart,
         all;
 
     if (!parallelism) parallelism = Infinity;
@@ -52,7 +65,9 @@
         if (!error) {
           tasks.push(arguments);
           ++remaining;
-          pop();
+          if (queueStarted) {
+            pop();
+          }
         }
         return q;
       },
@@ -66,6 +81,14 @@
         await = f;
         all = true;
         if (!remaining) notify();
+        return q;
+      },
+      start: function() {
+        if (queueStarted) {
+          throw "Can't start queue twice.";
+        }
+        queueStarted = true;
+        pop();
         return q;
       }
     };

@@ -19,6 +19,23 @@ tasks.forEach(function(t) { q.defer(t); });
 q.awaitAll(function(error, results) { console.log("all done!"); });
 ```
 
+You can also create a queue that won't be started immediately, and then start it later:
+
+```js
+var q = queue(1, {
+  autoStart: false
+});
+// or var q = queue({ autoStart: false }) if you mean to use the default for parallelism...
+
+tasks.forEach(function(t) { q.defer(t); });
+
+// Later when you need to start processing the queue:
+q.start();
+
+// Then wait for results:
+q.awaitAll(function(error, results) { console.log("all done!"); });
+```
+
 Queue.js can be run inside Node.js or in a browser.
 
 ## Installation
@@ -49,9 +66,15 @@ And then `require("queue-async")`. (The package name is [queue-async](https://np
 
 ## API Reference
 
-### queue([parallelism])
+### queue([parallelism], [options])
 
 Constructs a new queue with the specified *parallelism*. If *parallelism* is not specified, the queue has infinite parallelism. Otherwise, *parallelism* is a positive integer. For example, if *parallelism* is 1, then all tasks will be run in series. If *parallelism* is 3, then at most three tasks will be allowed to proceed concurrently; this is useful, for example, when loading resources in a web browser.
+
+The currently supported options include:
+
+* autoStart: if you set this value to false, then you must call start after deferring tasks to the queue.
+
+It's worth noting that you can pass both parallelism and options, just one of them or neither.
 
 ### queue.defer(task[, arguments…])
 
@@ -77,6 +100,10 @@ Sets the *callback* to be invoked when all deferred tasks have finished.
 The first argument to the *callback* is the first error that occurred, or null if no error occurred. If an error occurred, there are no additional arguments to the callback. Otherwise, the *await* callback is passed each result as an additional separate argument, while the *awaitAll* callback is passed a single array of results as the second argument.
 
 If all tasks complete before the *await* or *awaitAll* callback is set, the callback will be invoked immediately. This method should only be called once, after any tasks have been deferred. If the await callback is set multiple times, or set before a task is deferred, the behavior of the queue is undefined.
+
+### queue.start()
+
+Starts processing items in a queue that's not set to auto-start. If the queue is already started this method throws.
 
 ## Callbacks
 
