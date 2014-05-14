@@ -336,7 +336,82 @@ suite.addBatch({
         {active: 1, index: 9}
       ]);
     }
+  },
+
+  "do not auto-start queue of synchronous tasks": {
+    topic: function() {
+      var t = synchronousTask();
+      var q = queue(1, { autoStart: false })
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t);
+
+      q.start().defer(t).awaitAll(this.callback);
+    },
+    "does not fail": function(error, results) {
+      assert.isNull(error);
+    },
+    "executes all tasks in series": function(error, results) {
+      assert.deepEqual(results, [
+        {active: 1, index: 0},
+        {active: 1, index: 1},
+        {active: 1, index: 2},
+        {active: 1, index: 3},
+        {active: 1, index: 4},
+        {active: 1, index: 5},
+        {active: 1, index: 6},
+        {active: 1, index: 7},
+        {active: 1, index: 8},
+        {active: 1, index: 9},
+        {active: 1, index: 10}
+      ]);
+    }
+  },
+
+  "do not auto-start queue of synchronous tasks with default parallelism": {
+    topic: function() {
+      var t = synchronousTask();
+      var q = queue({ autoStart: false })
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t)
+                .defer(t);
+
+      q.start().defer(t).awaitAll(this.callback);
+    },
+    "does not fail": function(error, results) {
+      assert.isNull(error);
+    },
+    "executes all tasks in series": function(error, results) {
+      assert.deepEqual(results, [
+        {active: 1, index: 0},
+        {active: 1, index: 1},
+        {active: 1, index: 2},
+        {active: 1, index: 3},
+        {active: 1, index: 4},
+        {active: 1, index: 5},
+        {active: 1, index: 6},
+        {active: 1, index: 7},
+        {active: 1, index: 8},
+        {active: 1, index: 9},
+        {active: 1, index: 10}
+      ]);
+    }
   }
+
 
 });
 
