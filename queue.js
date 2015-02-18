@@ -69,7 +69,7 @@
         return q;
       },
       length: function() {
-        return tasks.length;
+        return remaining;
       }
     };
   }
