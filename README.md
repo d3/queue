@@ -76,7 +76,16 @@ Sets the *callback* to be invoked when all deferred tasks have finished.
 
 The first argument to the *callback* is the first error that occurred, or null if no error occurred. If an error occurred, there are no additional arguments to the callback. Otherwise, the *await* callback is passed each result as an additional separate argument, while the *awaitAll* callback is passed a single array of results as the second argument.
 
+```js
+// Multiple arguments
+q.await(function(error, result1, result2) { "do stuff"; });
+// Single argument [ result1, result2, ...]
+q.awaitAll(function(error, resultArray) { "do stuff"; });
+```
+
 If all tasks complete before the *await* or *awaitAll* callback is set, the callback will be invoked immediately. This method should only be called once, after any tasks have been deferred. If the await callback is set multiple times, or set before a task is deferred, the behavior of the queue is undefined.
+
+Only one single callback (either *await* or *awaitAll*) can be set. 
 
 ## Callbacks
 
