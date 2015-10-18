@@ -1,7 +1,7 @@
 (function() {
   var slice = [].slice;
 
-  function queue(parallelism) {
+  function queue(parallelism, progress) {
     var q,
         tasks = [],
         started = 0, // number of tasks that have been started (and perhaps finished)
@@ -13,6 +13,7 @@
         all;
 
     if (!parallelism) parallelism = Infinity;
+    if (!progress) progress = noop;
 
     function pop() {
       while (popping = started < tasks.length && active < parallelism) {
@@ -35,7 +36,10 @@
           notify();
         } else {
           tasks[i] = r;
-          if (--remaining) popping || pop();
+          if (--remaining) {
+              popping || pop();
+              progress(remaining);
+          }
           else notify();
         }
       };
