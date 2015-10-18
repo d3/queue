@@ -67,6 +67,9 @@
         all = true;
         if (!remaining) notify();
         return q;
+      },
+      length: function() {
+        return remaining;
       }
     };
   }
