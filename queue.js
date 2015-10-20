@@ -71,7 +71,35 @@
     };
   }
 
+  queue.then = function(fulfill) {
+    var q = fulfill();
+    return then(function(callback) { callback(null, q); });
+  };
+
+  function then(previous) {
+    return {
+      then: function(fulfill, reject) {
+        var next = pass;
+        if (!reject) reject = pass;
+        previous(function(error, q) {
+          function resolve(error) {
+            try {
+              next(null, error
+                  ? reject.call(this, error)
+                  : fulfill.apply(this, [].slice.call(arguments, 1)));
+            } catch (error) {
+              next(error);
+            }
+          }
+          error ? resolve(error) : q.await(resolve);
+        });
+        return then(function(callback) { next = callback; });
+      }
+    };
+  }
+
   function noop() {}
+  function pass(error) { if (error) throw error; }
 
   queue.version = "1.0.7";
   if (typeof define === "function" && define.amd) define(function() { return queue; });
