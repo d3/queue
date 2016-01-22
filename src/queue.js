@@ -3,83 +3,84 @@ var slice = [].slice,
 
 function noop() {}
 
-export default function(parallelism) {
-  var q,
-      tasks = [],
-      started = 0, // number of tasks that have been started (and perhaps finished)
-      active = 0, // number of tasks currently being executed (started but not finished)
-      remaining = 0, // number of tasks not yet finished
-      popping, // inside a synchronous task callback?
-      error = null,
-      callback = noop,
-      callbackAll;
+function Queue(parallelism) {
+  if (!(parallelism >= 1)) throw new Error;
+  this._tasks = [];
+  this._parallelism = parallelism;
+  this._started = 0; // number of tasks that have been started (and perhaps finished)
+  this._active = 0; // number of tasks currently being executed (started but not finished)
+  this._remaining = 0; // number of tasks not yet finished
+  this._popping = false; // inside a synchronous task callback?
+  this._error = null;
+  this._callback = noop;
+  this._callbackAll = false;
+}
 
-  parallelism = arguments.length ? +parallelism : Infinity;
+function notify(q) {
+  if (q._error != null) q._callback(q._error);
+  else if (q._callbackAll) q._callback(q._error, q._tasks);
+  else q._callback.apply(null, [q._error].concat(q._tasks));
+}
 
-  function pop() {
-    while (popping = started < tasks.length && active < parallelism) {
-      var i = started++,
-          t = tasks[i],
-          j = t.length - 1,
-          c = t[j];
-      tasks[i] = running;
-      ++active;
-      t[j] = finished(i);
-      c.apply(null, t);
-    }
-  }
-
-  function finished(i) {
-    return function(e, r) {
-      if (tasks[i] !== running) throw new Error;
-      tasks[i] = null;
-      --active;
-      if (error != null) return;
-      if (e != null) {
-        error = e; // ignore new tasks and squelch active callbacks
-        started = remaining = NaN; // stop queued tasks from starting
-        notify();
-      } else {
-        tasks[i] = r;
-        if (--remaining) popping || pop();
-        else notify();
-      }
-    };
-  }
-
-  function check() {
-    if (callback !== noop) throw new Error;
-  }
-
-  function notify() {
-    if (error != null) callback(error);
-    else if (callbackAll) callback(error, tasks);
-    else callback.apply(null, [error].concat(tasks));
-  }
-
-  return q = {
-    defer: function(f) {
-      check();
-      if (!error) {
-        var t = slice.call(arguments, 1);
-        t.push(f);
-        tasks.push(t);
-        ++remaining;
-        pop();
-      }
-      return q;
-    },
-    await: function(f) {
-      check();
-      callback = f, callbackAll = false;
-      if (!remaining) notify();
-      return q;
-    },
-    awaitAll: function(f) {
-      check();
-      callback = f, callbackAll = true;
-      if (!remaining) notify();
-      return q;
+function finished(q, i) {
+  return function(e, r) {
+    if (q._tasks[i] !== running) throw new Error;
+    q._tasks[i] = null;
+    --q._active;
+    if (q._error != null) return;
+    if (e != null) {
+      q._error = e; // ignore new tasks and squelch active callbacks
+      q._started = q._remaining = NaN; // stop queued tasks from starting
+      notify(q);
+    } else {
+      q._tasks[i] = r;
+      if (--q._remaining) q._popping || pop(q);
+      else notify(q);
     }
   };
 }
+
+function pop(q) {
+  while (q._popping = q._started < q._tasks.length && q._active < q._parallelism) {
+    var i = q._started++,
+        t = q._tasks[i],
+        j = t.length - 1,
+        c = t[j];
+    q._tasks[i] = running;
+    ++q._active;
+    t[j] = finished(q, i);
+    c.apply(null, t);
+  }
+}
+
+Queue.prototype = {
+  defer: function(task) {
+    if (this._callback !== noop) throw new Error;
+    if (!this._error) {
+      var t = slice.call(arguments, 1);
+      t.push(task);
+      this._tasks.push(t);
+      ++this._remaining;
+      pop(this);
+    }
+    return this;
+  },
+  await: function(callback) {
+    if (this._callback !== noop) throw new Error;
+    this._callback = callback, this._callbackAll = false;
+    if (!this._remaining) notify(this);
+    return this;
+  },
+  awaitAll: function(callback) {
+    if (this._callback !== noop) throw new Error;
+    this._callback = callback, this._callbackAll = true;
+    if (!this._remaining) notify(this);
+    return this;
+  }
+};
+
+export default function queue(parallelism) {
+  return new Queue(arguments.length ? +parallelism : Infinity);
+}
+
+queue.prototype = Queue.prototype;
