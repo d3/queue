@@ -11,6 +11,11 @@ tape("version is semantic", function(test) {
   test.end();
 });
 
+tape("a queue is instanceof queue", function(test) {
+  test.ok(queue() instanceof queue);
+  test.end();
+});
+
 tape("example queue of fs.stat", function(test) {
   queue()
       .defer(fs.stat, __dirname + "/../index.js")
