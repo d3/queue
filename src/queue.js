@@ -94,6 +94,15 @@ function newQueue(concurrency) {
       notify = callback;
       if (!active) notify(error, results);
       return q;
+    },
+    status: function() {
+      return error == null ? {
+        waiting: waiting,
+        active: active,
+        ended: ended
+      } : {
+        error: error
+      };
     }
   };
 }
