@@ -94,7 +94,7 @@ function delayedHello(name, delay, callback) {
 }
 ```
 
-When you call [*queue*.abort](#queue_abort), any in-progress tasks will be immediately aborted; in addition, any pending (not-yet-started) tasks not be started. Note that you can also use *queue*.abort *without* abortable tasks, in which case pending tasks will be cancelled, though active tasks will continue to run. Conveniently, the [d3-request](https://github.com/d3/d3-request) library implements abort atop XMLHttpRequest. For example:
+When you call [*queue*.abort](#queue_abort), any in-progress tasks will be immediately aborted; in addition, any pending (not-yet-started) tasks will not be started. Note that you can also use *queue*.abort *without* abortable tasks, in which case pending tasks will be cancelled, though active tasks will continue to run. Conveniently, the [d3-request](https://github.com/d3/d3-request) library implements abort atop XMLHttpRequest. For example:
 
 ```js
 var q = d3.queue()
