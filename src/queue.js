@@ -113,5 +113,5 @@ function maybeNotify(q) {
 }
 
 export default function queue(concurrency) {
-  return new Queue(arguments.length ? +concurrency : Infinity);
+  return new Queue(arguments.length ? +concurrency : 1);
 }
