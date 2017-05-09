@@ -3,7 +3,7 @@ import {slice} from "./array";
 var noabort = {};
 
 function Queue(size) {
-  if (!(size >= 1)) throw new Error;
+  if (!(size >= 1)) throw new Error('Queue concurrency size can\'t be 0')
   this._size = size;
   this._call =
   this._error = null;
