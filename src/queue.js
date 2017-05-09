@@ -1,5 +1,3 @@
-import {slice} from "./array";
-
 var noabort = {};
 
 function Queue(size) {
@@ -20,8 +18,17 @@ Queue.prototype = queue.prototype = {
     if (typeof callback !== "function") throw new Error("invalid callback");
     if (this._call) throw new Error("defer after await");
     if (this._error != null) return this;
-    var t = slice.call(arguments, 1);
+
+    var l = arguments.length;
+    var t = [];
+    if (l > 0) {
+      t = new Array(l - 1);
+      for (var i = 1; i < l; ++i) {
+        t[i - 1] = arguments[i];
+      }
+    }
     t.push(callback);
+
     ++this._waiting, this._tasks.push(t);
     poke(this);
     return this;
