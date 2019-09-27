@@ -28,6 +28,7 @@
     "prepublish": "npm run test && uglifyjs --preamble \"$(preamble)\" build/d3-queue.js -c -m -o build/d3-queue.min.js",
     "postpublish": "git push && git push --tags && cd ../d3-queue-bower && git pull && cp -v ../d3-queue/README.md ../d3-queue/LICENSE ../d3-queue/build/d3-queue.js . && git add README.md LICENSE d3-queue.js && git commit -m ${npm_package_version} && git tag -am ${npm_package_version} v${npm_package_version} && git push && git push --tags && cd ../d3.github.com && git pull && cp ../d3-queue/build/d3-queue.js d3-queue.v3.js && cp ../d3-queue/build/d3-queue.min.js d3-queue.v3.min.js && git add d3-queue.v3.js d3-queue.v3.min.js && git commit -m \"d3-queue ${npm_package_version}\" && git push && cd ../d3-queue && zip -j build/d3-queue.zip -- LICENSE README.md build/d3-queue.js build/d3-queue.min.js"
   },
+  "sideEffects": false,
   "devDependencies": {
     "eslint": "3",
     "package-preamble": "0.1",
