@@ -1,6 +1,8 @@
 # d3-queue
 
-A **queue** evaluates zero or more *deferred* asynchronous tasks with configurable concurrency: you control how many tasks run at the same time. When all the tasks complete, or an error occurs, the queue passes the results to your *await* callback. This library is similar to [Async.js](https://github.com/caolan/async)’s [parallel](https://github.com/caolan/async#paralleltasks-callback) (when *concurrency* is infinite), [series](https://github.com/caolan/async#seriestasks-callback) (when *concurrency* is 1), and [queue](https://github.com/caolan/async#queue), but features a much smaller footprint: as of release 2, d3-queue is about 700 bytes gzipped, compared to 4,300 for Async.
+**Deprecation notice**: Now that D3 uses Promises rather than callbacks (see [d3-fetch](https://github.com/d3/d3-fetch)), this library is no longer needed. Use [Promise.all](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all) instead, or [p-queue](https://github.com/sindresorhus/p-queue) if you need configurable concurrency.
+
+A **queue** evaluates zero or more *deferred* asynchronous tasks with configurable concurrency: you control how many tasks run at the same time. When all the tasks complete, or an error occurs, the queue passes the results to your *await* callback. This library is similar to [Async.js](https://github.com/caolan/async)’s [parallel](https://github.com/caolan/async#paralleltasks-callback) (when *concurrency* is infinite), [series](https://github.com/caolan/async#seriestasks-callback) (when *concurrency* is 1), and [queue](https://github.com/caolan/async#queue), but features a smaller footprint.
 
 Each task is defined as a function that takes a callback as its last argument. For example, here’s a task that says hello after a short delay:
 
@@ -111,7 +113,7 @@ To abort these requests, call `q.abort()`.
 
 ## Installing
 
-If you use NPM, `npm install d3-queue`. If you use Bower, `bower install d3-queue`. Otherwise, download the [latest release](https://github.com/d3/d3-queue/releases/latest). You can also load directly from [d3js.org](https://d3js.org), either as a [standalone library](https://d3js.org/d3-queue.v3.min.js) or as part of [D3 4.0](https://github.com/d3/d3). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
+If you use NPM, `npm install d3-queue`. If you use Bower, `bower install d3-queue`. Otherwise, download the [latest release](https://github.com/d3/d3-queue/releases/latest). You can also load directly from [d3js.org](https://d3js.org), either as a [standalone library](https://d3js.org/d3-queue.v3.min.js) or as part of [D3 4.0](https://github.com/d3/d3/releases/tag/v4.13.0). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
 
 ```html
 <script src="https://d3js.org/d3-queue.v3.min.js"></script>
@@ -122,7 +124,6 @@ var q = d3.queue();
 </script>
 ```
 
-[Try d3-queue in your browser.](https://tonicdev.com/npm/d3-queue)
 
 ## API Reference
 
